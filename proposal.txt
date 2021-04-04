@@ -1,0 +1,14 @@
+Hello my proposal for a website !
+my website would be designed for NA League of Legends users to be able to see their
+match history stats and compare them to League of legend's top 500 players match history
+
+The user's that would come to my site would be NA based league of legends gamers 
+the age range is accoding to riot anywhere from 13-25 years old 
+
+I will be using riot's api which is a very detailed. I would use it to grab a user's ign 
+and use that to use the same api and query for further details.
+using that same api I can also grab top 500 player data and use that to compare 
+against the user's data 
+
+for the last part I am not sure yet I will be designing the actual app and all 
+of its systems monday morning as part of the capstone's part one 
