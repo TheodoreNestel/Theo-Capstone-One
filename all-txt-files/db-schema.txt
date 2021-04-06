@@ -1,0 +1,18 @@
+for this project I do not need a complicated database since I am not storing any data other than a user
+
+
+
+
+all the data we play with is prone to massive changes since theyre based on a player's match history so the only data that I am planning 
+on saving are as follow and will inside a singular table using Postgresql 
+
+
+"user" table 
+
+id - self incrementing 
+email - for login 
+password - for login 
+player username - for back end api data calls 
+
+
+there is no need for further data collection so consider this the schema 

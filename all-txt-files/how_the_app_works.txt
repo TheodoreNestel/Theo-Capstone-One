@@ -1,0 +1,35 @@
+I am calling this app league Vs 
+
+this app will let players plug in their names to our site which will pull up their player information 
+this will be their in game account information as well as the info about their last 10 games of legaue of legends 
+the app will also let the user type in the username of another player to compare their profiles
+
+Id like to also have a part in the middle that will grab the match data and directly have a box with the data comparison but that will be 
+added later if i have time
+
+the app will have authentication capabilities so if a user chooses to sign up they will not have to retype their username
+the system will automatically pull up their game user profile and the data attached 
+
+
+this app will rely on riot games api for which the notes will be under riot_api_notes 
+
+
+
+
+necessary routes  
+
+"/" home page which will have three links sign up - enter LoL username - log in 
+
+"/player-page-public" this is where we will have the meat and potatoes of the app for unregistered users 
+"/player-page" this will be the slightly more custom version for user's that are signed in 
+
+"/signup" a simple signup form and then authentication after signup if all data is correct this will redirect to "/player-page"
+
+"/login" a simple login page that will redirect to "player-page" if authentication works or flashes a didnt work message if it doesnt 
+"/logout" an option that is only visible if the user is loged in and will return them to our homepage when clicked also log them out 
+
+
+ 
+
+the logic of this app will rely heavily on the twitter clone project and the latest flask 2 assesment 5 RESTful api project 
+both of those will also be up on my github should you want to take a look at the source material 
