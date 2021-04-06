@@ -1,0 +1,50 @@
+here I will try to breakdown a few things I didnt understand verywell 
+
+
+
+to start before you can do anything based around game objects 
+you need to grab the user's account id by finding their account by name 
+
+this will return an id which is considered the summonerid 
+when making this call we used query params to submit our key 
+https://na1.api.riotgames.com/lol/summoner/v4/summoners/by-name/Mistral?api_key=RGAPI-c232feec-92e4-4e08-92ec-2e7581424139
+{
+  "id": "AtQ82Kdou4yc7yrX4mlNMzgfUDv3ZsT2XpsKlEDTwb523oo",
+  "accountId": "9lmMyyR_XEETSxoUtReHxx3ABMV3tJVe_1axc-1OTNWQb6E",
+  "puuid": "iroxC-5ka4Z8wz7oyuB4T8CNDmfzO6aBrslYOi7aIuVY8egyQRxgC0Kwz00hOoLRMfkG_hqH47t8qQ",
+  "name": "Mistral",
+  "profileIconId": 4637,
+  "revisionDate": 1617311417000,
+  "summonerLevel": 325
+}
+
+encryptedsummonerid = id 
+encryptedaccountid = account id 
+
+etc 
+
+
+this is important because it isnt specifed anywhere however all other inputs here are needed to make further more detailed cause
+so make sure to store them 
+
+
+when making a call to the matchmaking url it will return an object with a key or mathced and a value of an array with objects 
+
+response.json().matches[0].matchId would be how to get into it 
+
+
+also to use header params  
+
+import requests
+
+response = requests.get(
+'https://api.github.com/search/repositories',
+params={'q': 'requests+language:python'},
+headers={'Accept': 'application/vnd.github.v3.text-match+json'},
+)
+
+
+theyre passed in like so 
+
+to get the data I want the api is pretty comprehensive Ill write comments as I need to explaining what calls I made and why 
+
