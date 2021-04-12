@@ -68,7 +68,7 @@ class User(db.Model):
         user = cls.query.filter_by(email=email).first() #filter our db by username and find the first match 
 
         if user:
-            is_auth = bcrypt.check_password_hash(user.email, password) #do the password / email match ?
+            is_auth = bcrypt.check_password_hash(user.password, password) #do the password match for this user?
             if is_auth:
                 return user #if its a match return the user 
 

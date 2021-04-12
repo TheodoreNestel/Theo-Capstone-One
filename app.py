@@ -1,3 +1,5 @@
+from flask.globals import current_app
+from flask.templating import render_template_string
 from sqlalchemy import exc
 from form import UserAddForm
 from flask import Flask , render_template , redirect , request ,jsonify , session , g , flash 
@@ -28,11 +30,41 @@ app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', "it's a secret") #pls ch
 
 connect_db(app)
 
+CURR_USER = "current_user" #we will slap this in our sessions to see if a user is logged in 
+
 ################################
 
 
 #authentication routes $$$$$$$$$$$$$$$
 #TODO implement sign up , login / log out features using g and wtform 
+@app.before_request 
+
+def add_user_to_g():
+ #here is where we add our current user to our g storage bin
+    """if user is logged in add the user to flask global : g """
+    if CURR_USER in session: #if we see that CURR_USER is our session then we grab our user object 
+        g.user = User.query.get(session[CURR_USER]) #this essentially queries by id in the user model 
+    
+    else:
+        g.user = None #if we dont have an id you cant add anything to flask global 
+
+
+def login(user):
+    """log in a user"""
+
+    session[CURR_USER] = user.id #we grab the id from the passed in user and slap it into our session
+
+def do_logout():
+    """Logout user."""
+    #when this function is called log out the user 
+    if CURR_USER in session: #checks to see if there CURR user is in session if it is we can log a user out 
+
+        del session[CURR_USER] #delete the session and flash a bye message 
+        flash("succesfully logged out") 
+
+
+
+
 
 @app.route("/signup", methods=["GET","POST"])
 def signup():
@@ -44,29 +76,40 @@ def signup():
             user = User.signup(email = form.email.data , username = form.username.data , password = form.password.data)
             db.session.commit()
 
-            #TODO ADD LOGIN 
-            return redirect("/")
-
+    
         except IntegrityError:
             flash("Email already in use", 'danger')
             return render_template('signup_form.html', form = form) 
+
+        login(user) #we pass in the newly commited user object and then redirect home 
+        return render_template("index.html") #TODO: bring to actual user page where their data will be 
+
     else:
         return render_template("signup_form.html", form=form)
 
 
 @app.route("/login",methods=["GET","POST"])
-def login():
+def login_form():
     """Handles the login"""
     form = LoginForm()
+    if form.validate_on_submit(): #if the form is submitted then 
+        user = User.authenticate(form.email.data , form.password.data) # we pass in email and password to out authenticate func
+        #located in the user model 
+        if user: #if authenticate returns an object we're in ! 
+            login(user) #we login that user based on the object sent through by authenticate 
+            flash(f"You have succesfully logged in {user.username}") # we flash them a message 
+            return redirect("/")#TODO: make the page for logged in users 
+
 
     return render_template("login.html" , form = form )
 
 
 @app.route("/logout")
 def logout():
+    """handles logout"""
     #this should log our the user flash a message and then send them back to the homepage 
+    do_logout()
     return redirect("/")
-
 #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 
 
@@ -78,7 +121,11 @@ def not_signed_in_homepage():
     """this serves our homepage when a user goes to our website by default they wont be signed in"""
     #todo add logic to decide which homepage to serve based on the satus of g 
     form = UsernameForm()
-    return render_template("home.html",  form = form )
+
+    if not g.user:  #if we arent logged in show the default home page
+        return render_template("home.html",  form = form )
+
+    return render_template("user_page.html")
 
 
 
@@ -107,6 +154,10 @@ def get_lol_user():
 @app.route("/compare_user")
 def compare():
     return #an object that can be added on the user_page.html with data that is compared 
+
+@app.route("/edit_userinfo")
+def update():
+    return #Add a route that changes the username of the user 
 
 #******************************************
 
