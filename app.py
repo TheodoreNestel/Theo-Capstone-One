@@ -5,9 +5,9 @@ from form import UserAddForm
 from flask import Flask , render_template , redirect , request ,jsonify , session , g , flash 
 import requests
 import os  
-from models import User , connect_db , db 
+from models import User , connect_db , db  , change_password
 from sqlalchemy.exc import IntegrityError
-from form import UserAddForm , UsernameForm , LoginForm 
+from form import UserAddForm , UsernameForm , LoginForm , UserDetailForm 
 
 
 
@@ -110,6 +110,38 @@ def logout():
     #this should log our the user flash a message and then send them back to the homepage 
     do_logout()
     return redirect("/")
+
+@app.route("/edit_info" , methods=["GET","POST"])
+def edit_info():
+    """lets a user change their account info"""
+
+    if not g.user: #makes sure there is a logged in user 
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
+
+    
+    form = UserDetailForm()
+
+    if form.validate_on_submit(): #if the user submits the update form 
+        curr_password = form.current_password.data #grab their current password so we can authenticate them 
+        user = User.authenticate(g.user.email , curr_password) #get the user object after we make sure they have the correct password
+        #then we grab all the data from the form 
+        new_username = form.new_username.data
+        new_password = form.new_password.data
+        if user: #if authenticate above returns a user object then we update the user's info in our db 
+            user.username = new_username
+            user.password = change_password(new_password)
+            db.session.add(user)
+            db.session.commit()
+            return redirect("/")
+        
+    else:
+        return render_template("edit_user.html" , form = form )
+
+        
+    
+
+
 #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 
 

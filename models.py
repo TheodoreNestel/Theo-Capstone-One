@@ -89,6 +89,14 @@ def connect_db(app):
     db.init_app(app)
 
 
+#a helper function to help us update a user's password 
+
+def change_password(password):
+
+    new_hashed_pwd = bcrypt.generate_password_hash(password).decode('UTF-8')
+
+    return new_hashed_pwd
+
 
 
     

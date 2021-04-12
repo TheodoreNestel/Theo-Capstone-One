@@ -24,4 +24,12 @@ class LoginForm(FlaskForm):
     email = StringField('E-mail', validators=[DataRequired(), Email()])
     password = PasswordField('Password', validators=[Length(min=6)])
 
+class UserDetailForm(FlaskForm):
+    """update user info"""
+
+    new_username = StringField('New LoL Username')
+    new_password = PasswordField('New Password', validators=[Length(min=6)])
+    current_password = PasswordField('Current Password', validators=[Length(min=6)])
+    
+    
 
