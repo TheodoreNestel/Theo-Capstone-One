@@ -32,6 +32,8 @@ connect_db(app)
 
 CURR_USER = "current_user" #we will slap this in our sessions to see if a user is logged in 
 
+RIOT_API_KEY = "RGAPI-c2bf15bd-fa9e-431a-a753-67ab9bdf0a56" #This will have to be changed every 24h 
+
 ################################
 
 
@@ -114,6 +116,9 @@ def logout():
 @app.route("/edit_info" , methods=["GET","POST"])
 def edit_info():
     """lets a user change their account info"""
+    
+    #TODO: use front end java script to make it possible to change username without changing passwords 
+
 
     if not g.user: #makes sure there is a logged in user 
         flash("Access unauthorized.", "danger")
@@ -136,7 +141,8 @@ def edit_info():
             return redirect("/")
         
     else:
-        return render_template("edit_user.html" , form = form )
+        current_user = User.query.get(g.user.id) #we pass the user object so we can populate the edit page form inputs 
+        return render_template("edit_user.html" , form = form,current_user = current_user  )
 
         
     
@@ -164,32 +170,43 @@ def not_signed_in_homepage():
 
 #RESTful api routes ***********************
 
-@app.route("/get_user_profile", methods=["POST","GET"])
+@app.route("/api/get_user_profile", methods=["POST","GET"])
 def get_lol_user():
     """this will make a call to an api to get a user's profile based on the username they provided"""
-    #todo grab the data from the main page form that contains the region and username to make our first query 
-    #to the riot api to get their account info then from there make a second call to get that user's match history 
-    #then serve that data to the user 
 
-    #on the back end we will also store all the data we got back as a local object 
 
-    #inside that new template will be a second form to add a second user from that same region 
-    #if another username is run through we run the logic above again with the new username and then display 
-    #both user's data side by side 
+    #variables we will need for the query strings 
+    end_index = 10 #by default we only want the last 10 games 
 
-    #NOTE: a smart thing to do might be having the query be put inside its own function that return the data from the api
-    #that way we can call it multiple times 
+    reponse = {} # we declare our response object before we fill it with the data we need 
 
-    #NOTE: if two username are entered both should be stored in objects that can be reached anywhere 
-    return render_template("user_page.html")
+    riot_account_resp = requests.get(f"https://na1.api.riotgames.com/lol/summoner/v4/summoners/by-name/Mistral?api_key={RIOT_API_KEY}")
+
+    riot_account_id = riot_account_resp.json()["accountId"] #this is a string containing the accountId we will use to pull match history
+
+    #now that we have to accountId we can query for match history 
+    riot_account_match_history = requests.get(f"https://na1.api.riotgames.com/lol/match/v4/matchlists/by-account/{riot_account_id}?endIndex={end_index}&api_key={RIOT_API_KEY}")
+    #this returns an object with a key of matches and a list of matches objects 
+
+    #for now that is all we need from the back end
+    #to make sense of all the data we will use a tool called Datadragon but we will use this on the front end
+    
+    #lets assemble a response that the front end can make sense of 
+
+
+
+
+
+    return riot_account_match_history.json() #this needs to return a json object
+
+
+
 
 @app.route("/compare_user")
 def compare():
     return #an object that can be added on the user_page.html with data that is compared 
 
-@app.route("/edit_userinfo")
-def update():
-    return #Add a route that changes the username of the user 
+ 
 
 #******************************************
 
@@ -198,3 +215,7 @@ def update():
 
 ########################################################
 
+
+
+#TODO summary front end 
+# - Add front end logic to the edit page so that a user can change their username without having to edit their password
