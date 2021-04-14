@@ -25,6 +25,9 @@ class User(db.Model):
     #this is where we will store the password once its hashed 
     password = db.Column(db.Text,nullable = False)
 
+    #we need to store a user's region so we know which api to call 
+    region = db.Column(db.Text,nullable = False)
+
     #######Functions#########
 
     #a function that will return info on the object 
@@ -34,7 +37,7 @@ class User(db.Model):
     #######class Functions###
 
     @classmethod
-    def signup(cls, username, email, password): # a method for signing up users 
+    def signup(cls, username, email, password,region): # a method for signing up users 
         """Sign up user.
 
         Hashes password and adds user to system.
@@ -46,6 +49,7 @@ class User(db.Model):
             username=username,
             email=email,
             password=hashed_pwd,
+            region=region
             )
 
         db.session.add(user) #add if to our db.session

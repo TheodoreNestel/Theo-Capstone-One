@@ -2,16 +2,23 @@
 {% block content %}
 
 <h2 class="join-message">Look up a player</h2>
-    <form method="POST" id="user_form">
-      {{ form.hidden_tag() }}
 
+
+
+<div class="input-group">
+<div class="form-outline">
+
+    <form  id="user_form" action="/user">
+      {{ form.hidden_tag() }}
       {% for field in form if field.widget.input_type != 'hidden' %}
         {% for error in field.errors %}
           <span class="text-danger">{{ error }}</span>
         {% endfor %}
         {{ field(placeholder=field.label.text, class="form-control") }}
       {% endfor %}
-
-      <button class="btn btn-primary btn-lg btn-block">Search</button>
+    </div>
+      <button class="btn btn-primary"> search </button>
     </form>
+</div>
+    
 {% endblock %}

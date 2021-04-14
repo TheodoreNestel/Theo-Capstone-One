@@ -32,7 +32,7 @@ connect_db(app)
 
 CURR_USER = "current_user" #we will slap this in our sessions to see if a user is logged in 
 
-RIOT_API_KEY = "RGAPI-c2bf15bd-fa9e-431a-a753-67ab9bdf0a56" #This will have to be changed every 24h 
+RIOT_API_KEY = "RGAPI-a41c175c-6117-4969-aca1-8d0a45b2128a" #This will have to be changed every 24h 
 
 ################################
 
@@ -62,7 +62,7 @@ def do_logout():
     if CURR_USER in session: #checks to see if there CURR user is in session if it is we can log a user out 
 
         del session[CURR_USER] #delete the session and flash a bye message 
-        flash("succesfully logged out") 
+        flash("succesfully logged out" , "success" ) 
 
 
 
@@ -75,7 +75,7 @@ def signup():
 
     if form.validate_on_submit():
         try: 
-            user = User.signup(email = form.email.data , username = form.username.data , password = form.password.data)
+            user = User.signup(email = form.email.data , username = form.username.data , password = form.password.data , region = form.region.data)
             db.session.commit()
 
     
@@ -84,7 +84,7 @@ def signup():
             return render_template('signup_form.html', form = form) 
 
         login(user) #we pass in the newly commited user object and then redirect home 
-        return render_template("index.html") #TODO: bring to actual user page where their data will be 
+        return redirect("/") #TODO: bring to actual user page where their data will be 
 
     else:
         return render_template("signup_form.html", form=form)
@@ -99,8 +99,10 @@ def login_form():
         #located in the user model 
         if user: #if authenticate returns an object we're in ! 
             login(user) #we login that user based on the object sent through by authenticate 
-            flash(f"You have succesfully logged in {user.username}") # we flash them a message 
+            flash(f"You have succesfully logged in {user.username}" , "success") # we flash them a message 
             return redirect("/")#TODO: make the page for logged in users 
+        else:
+            flash("invalid credentials please try again" , "warning")
 
 
     return render_template("login.html" , form = form )
@@ -135,7 +137,8 @@ def edit_info():
         new_password = form.new_password.data
         if user: #if authenticate above returns a user object then we update the user's info in our db 
             user.username = new_username
-            user.password = change_password(new_password)
+            if new_password:
+                user.password = change_password(new_password)
             db.session.add(user)
             db.session.commit()
             return redirect("/")
@@ -160,11 +163,26 @@ def not_signed_in_homepage():
     #todo add logic to decide which homepage to serve based on the satus of g 
     form = UsernameForm()
 
-    if not g.user:  #if we arent logged in show the default home page
-        return render_template("home.html",  form = form )
 
-    return render_template("user_page.html")
 
+    if g.user:  #if we are logged in show the default home page
+        user = User.query.get_or_404(g.user.id)
+        username = user.username
+        return render_template("user_page.html" ,user=user)
+
+
+    return render_template("home.html" , form = form)
+
+
+@app.route("/user")
+def get_user_not_logged():
+    """This route is used to find user's username and serve them a page if they arent logged in """
+
+    username = request.args.get("username")
+    region = request.args.get("region")
+    user = {'username':username,'region':region}
+
+    return render_template("user_page.html" , user=user)
 
 
 
@@ -172,20 +190,27 @@ def not_signed_in_homepage():
 
 @app.route("/api/get_user_profile", methods=["POST","GET"])
 def get_lol_user():
-    """this will make a call to an api to get a user's profile based on the username they provided"""
+    """this will make a call to an api to get a user's profile based on the username they provided
+        this will return 100 matches"""
 
+    #using front end magic we will only present 10 to start
 
     #variables we will need for the query strings 
-    end_index = 10 #by default we only want the last 10 games 
+    end_index = 10 #by default we only want the last 10 games
+    begin_index = 0 #by default this is 0 but if we want to load more data we can change this to what end index was before
+    region = request.json["region"] #Users have to select which region they're in as the data will differ 
+    
 
-    reponse = {} # we declare our response object before we fill it with the data we need 
+    username = request.json["username"]  
 
-    riot_account_resp = requests.get(f"https://na1.api.riotgames.com/lol/summoner/v4/summoners/by-name/Mistral?api_key={RIOT_API_KEY}")
+    response = {} # we declare our response object before we fill it with the data we need 
+
+    riot_account_resp = requests.get(f"https://{region}.api.riotgames.com/lol/summoner/v4/summoners/by-name/{username}?api_key={RIOT_API_KEY}")
 
     riot_account_id = riot_account_resp.json()["accountId"] #this is a string containing the accountId we will use to pull match history
 
     #now that we have to accountId we can query for match history 
-    riot_account_match_history = requests.get(f"https://na1.api.riotgames.com/lol/match/v4/matchlists/by-account/{riot_account_id}?endIndex={end_index}&api_key={RIOT_API_KEY}")
+    riot_account_match_history = requests.get(f"https://{region}.api.riotgames.com/lol/match/v4/matchlists/by-account/{riot_account_id}?api_key={RIOT_API_KEY}")
     #this returns an object with a key of matches and a list of matches objects 
 
     #for now that is all we need from the back end
@@ -193,20 +218,47 @@ def get_lol_user():
     
     #lets assemble a response that the front end can make sense of 
 
+    response["AccountInfo"] = riot_account_resp.json()
+    response["MatchHistory"] = riot_account_match_history.json()
+
+    #this will create a massive object with all the data from both our calls which will dissect in the front end 
+    #will adding assets from the DataDragon tool from riot 
+
+    return  jsonify(response ,201) # return our object with the match data and the account info 
+
+
+@app.route("/api/get_leaderboards" , methods=["POST","GET"])
+def get_leaderboards():
+    """Get the current leaderboard"""
+    region = request.json["region"] #format: na1 , eun1 
+    queue = request.json["queue"] #format: RANKED_FLEX_SR
+
+
+    response = {}
+    leaderboard = requests.get(f"https://{region}.api.riotgames.com/lol/league/v4/challengerleagues/by-queue/{queue}?api_key={RIOT_API_KEY}")
+    response["Leaderboards"] = leaderboard.json()
+    return jsonify(response, 201)
+
+@app.route("/api/get_match", methods=["POST","GET"])
+def get_match():
+
+    """Return details about a specific match """
+    region = request.json["region"] #format: na1 , eun1
+
+    response = {}
+    match_id = request.get["matchId"] #this is called GameId in the match history objects 
+    match_info = requests.get(f"https://{region}.api.riotgames.com/lol/match/v4/matches/{match_id}?api_key={RIOT_API_KEY}")
+    response["gameId"] = match_id
+    response["gameInfo"] = match_info.json()
+
+    return jsonify(response,201)
+
+
+#all the routes I will need now exist however I need to fix the way REGION is set 
+#Ideally it gets set once by the user at the start and 'were good go 
 
 
 
-
-    return riot_account_match_history.json() #this needs to return a json object
-
-
-
-
-@app.route("/compare_user")
-def compare():
-    return #an object that can be added on the user_page.html with data that is compared 
-
- 
 
 #******************************************
 
@@ -219,3 +271,7 @@ def compare():
 
 #TODO summary front end 
 # - Add front end logic to the edit page so that a user can change their username without having to edit their password
+
+
+
+

@@ -13,7 +13,7 @@ Fortunately riot offers 24h working keys for free simply after making an account
 please go to : https://developer.riotgames.com 
 and make an accoun the generate key 
 
-in my app there will be a global variable on the back end called riotKey please change the value to your key 
+in my app there will be a global variable on the back end called RIOT_API_KEY please change the value to your key 
 and the app should work from there. 
 
 You will need to do this every 24h which is when the key you just got will expire 

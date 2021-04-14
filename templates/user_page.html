@@ -1,9 +1,41 @@
 {%extends 'index.html'%}
+
+{%block additional_nav%}
+
+{%if user.id%}
+<li class="nav-item"> 
+<a class="nav-link" href="/edit_info" > Edit user info </a>
+</li>
+
+<li class="nav-item"> 
+<a class="nav-link" href="/logout" > Log Out </a>
+</li>
+
+{%endif%}
+
+{%endblock%}
+
+
+
+
 {%block content%}
-<a href="/edit_info">Edit User Info</a>
+
+
+
 
 <h1> TODO add the extracted api data here in a nice format 
 then also have another form where the user can input another username and if another username is entered
 have that user's data be displayed as well </h1>
 
+<h2> Test ! is this : {{user.username}}  your username ? ;) region is {{user.region}}
+
+<div class="input-group">
+<div class="form-outline">
+<form>
+<input placeholder="Enter a Username to VS" type="text" id="form1" class="form-control">
+</div>
+<button type="button" class="btn btn-primary">VS</button>
+</form>
+
+</div>
 {%endblock%}
