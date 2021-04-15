@@ -32,7 +32,7 @@ connect_db(app)
 
 CURR_USER = "current_user" #we will slap this in our sessions to see if a user is logged in 
 
-RIOT_API_KEY = "RGAPI-a41c175c-6117-4969-aca1-8d0a45b2128a" #This will have to be changed every 24h 
+RIOT_API_KEY = "RGAPI-50b5e6a5-362d-4e70-a45f-3fdc5bcbdcc0" #This will have to be changed every 24h 
 
 ################################
 
@@ -135,10 +135,14 @@ def edit_info():
         #then we grab all the data from the form 
         new_username = form.new_username.data
         new_password = form.new_password.data
+        new_region = form.new_password.data
         if user: #if authenticate above returns a user object then we update the user's info in our db 
-            user.username = new_username
+            if new_username:
+                user.username = new_username
             if new_password:
                 user.password = change_password(new_password)
+            if new_region:
+                user.region = new_region
             db.session.add(user)
             db.session.commit()
             return redirect("/")
@@ -166,9 +170,13 @@ def not_signed_in_homepage():
 
 
     if g.user:  #if we are logged in show the default home page
-        user = User.query.get_or_404(g.user.id)
-        username = user.username
-        return render_template("user_page.html" ,user=user)
+        
+        username = g.user.username
+        region = g.user.region
+        id = g.user.id 
+        user = {'username':username , 'region':region , 'id':id}
+
+        return render_template("user_page.html" ,user=user , form=form)
 
 
     return render_template("home.html" , form = form)
@@ -178,11 +186,13 @@ def not_signed_in_homepage():
 def get_user_not_logged():
     """This route is used to find user's username and serve them a page if they arent logged in """
 
+    form = UsernameForm()
+
     username = request.args.get("username")
     region = request.args.get("region")
     user = {'username':username,'region':region}
 
-    return render_template("user_page.html" , user=user)
+    return render_template("user_page.html" , user=user , form=form)
 
 
 
@@ -198,9 +208,10 @@ def get_lol_user():
     #variables we will need for the query strings 
     end_index = 10 #by default we only want the last 10 games
     begin_index = 0 #by default this is 0 but if we want to load more data we can change this to what end index was before
+
+
     region = request.json["region"] #Users have to select which region they're in as the data will differ 
     
-
     username = request.json["username"]  
 
     response = {} # we declare our response object before we fill it with the data we need 
@@ -269,8 +280,9 @@ def get_match():
 
 
 
-#TODO summary front end 
-# - Add front end logic to the edit page so that a user can change their username without having to edit their password
+#TODO 
+# - Add error checking if the front end passes a username or values that wont work on the riot api
+#return the client an error object that tells them it no work 
 
 
 

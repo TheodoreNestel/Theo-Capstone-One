@@ -1,5 +1,7 @@
 {%extends 'index.html'%}
 
+
+
 {%block additional_nav%}
 
 {%if user.id%}
@@ -23,19 +25,40 @@
 
 
 
-<h1> TODO add the extracted api data here in a nice format 
-then also have another form where the user can input another username and if another username is entered
-have that user's data be displayed as well </h1>
+<script>
+window.user = { 
+    username: "{{user.username}}",
+    region: "{{user.region}}"
+};
+  </script>
 
-<h2> Test ! is this : {{user.username}}  your username ? ;) region is {{user.region}}
 
-<div class="input-group">
-<div class="form-outline">
-<form>
-<input placeholder="Enter a Username to VS" type="text" id="form1" class="form-control">
+
+
+<div id="user1_data"></div>
+
+
+<div id="user2_data"></div>
+
+
+
+<!-- this form will be used to grab the second user should it be submitted and will display their last 10 games -->
+<div class="input-group justify-content-center " id="vs_form">
+<div class="form-outline ">
+
+    <form  id="user_form" action="submit">
+      {{ form.hidden_tag() }}
+      {% for field in form if field.widget.input_type != 'hidden' %}
+        {% for error in field.errors %}
+          <span class="text-danger">{{ error }}</span>
+        {% endfor %}
+        {{ field(placeholder=field.label.text, class="form-control") }}
+      {% endfor %}
+    </div>
+      <button class="btn btn-primary"> VS </button>
+    </form>
 </div>
-<button type="button" class="btn btn-primary">VS</button>
-</form>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js" integrity="sha512-bZS47S7sPOxkjU/4Bt0zrhEtWx0y0CRkhEp8IckzK+ltifIIE9EMIMTuT/mEzoIMewUINruDBIR/jJnbguonqQ==" crossorigin="anonymous"></script>
+<script src="static/ihatejs.js"></script>
 
-</div>
 {%endblock%}

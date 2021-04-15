@@ -34,9 +34,10 @@ class LoginForm(FlaskForm):
 class UserDetailForm(FlaskForm):
     """update user info"""
 
-    new_username = StringField('New LoL Username')
+    new_username = StringField('New LoL Username' ,validators=[Optional()])
     new_password = PasswordField('New Password', validators=[Length(min=6),Optional()])
     current_password = PasswordField('Current Password', validators=[Length(min=6)])
+    new_region = SelectField('Region', choices=REGIONS ,validators=[DataRequired() , Optional()])
     
     
 
