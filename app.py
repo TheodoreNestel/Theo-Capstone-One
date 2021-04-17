@@ -32,7 +32,7 @@ connect_db(app)
 
 CURR_USER = "current_user" #we will slap this in our sessions to see if a user is logged in 
 
-RIOT_API_KEY = "RGAPI-50b5e6a5-362d-4e70-a45f-3fdc5bcbdcc0" #This will have to be changed every 24h 
+RIOT_API_KEY = "RGAPI-663a6799-952e-4d16-94c1-e2a22acb6981" #This will have to be changed every 24h 
 
 ################################
 
@@ -255,11 +255,11 @@ def get_match():
 
     """Return details about a specific match """
     region = request.json["region"] #format: na1 , eun1
+    matchId = request.json["matchId"] #this is called GameId in the match history objects
 
     response = {}
-    match_id = request.get["matchId"] #this is called GameId in the match history objects 
-    match_info = requests.get(f"https://{region}.api.riotgames.com/lol/match/v4/matches/{match_id}?api_key={RIOT_API_KEY}")
-    response["gameId"] = match_id
+    match_info = requests.get(f"https://{region}.api.riotgames.com/lol/match/v4/matches/{matchId}?api_key={RIOT_API_KEY}")
+    response["gameId"] = matchId
     response["gameInfo"] = match_info.json()
 
     return jsonify(response,201)
