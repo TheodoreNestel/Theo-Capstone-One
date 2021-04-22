@@ -4,8 +4,8 @@ this app will let players plug in their names to our site which will pull up the
 this will be their in game account information as well as the info about their last 10 games of legaue of legends 
 the app will also let the user type in the username of another player to compare their profiles
 
-Id like to also have a part in the middle that will grab the match data and directly have a box with the data comparison but that will be 
-added later if i have time
+-- REMOVED DUE TO TIME CONSTRAINTS --[Id like to also have a part in the middle that will grab the match data and directly have a box with the data comparison but that will be 
+added later if i have time] --
 
 the app will have authentication capabilities so if a user chooses to sign up they will not have to retype their username
 the system will automatically pull up their game user profile and the data attached 

@@ -32,7 +32,7 @@ connect_db(app)
 
 CURR_USER = "current_user" #we will slap this in our sessions to see if a user is logged in 
 
-RIOT_API_KEY = "RGAPI-663a6799-952e-4d16-94c1-e2a22acb6981" #This will have to be changed every 24h 
+RIOT_API_KEY = "RGAPI-235c0fbb-10ec-4fef-b3f5-64ef2d9b9590" #This will have to be changed every 24h 
 
 ################################
 
@@ -168,7 +168,7 @@ def not_signed_in_homepage():
     form = UsernameForm()
 
 
-
+    
     if g.user:  #if we are logged in show the default home page
         
         username = g.user.username
@@ -218,6 +218,19 @@ def get_lol_user():
 
     riot_account_resp = requests.get(f"https://{region}.api.riotgames.com/lol/summoner/v4/summoners/by-name/{username}?api_key={RIOT_API_KEY}")
 
+    
+
+    if riot_account_resp.status_code == 404:
+        response["err"] = {
+           "summoner_error" : "summoner not found",
+           "summoner": username
+        }
+
+        return jsonify(response)
+
+        
+
+
     riot_account_id = riot_account_resp.json()["accountId"] #this is a string containing the accountId we will use to pull match history
 
     #now that we have to accountId we can query for match history 
@@ -262,6 +275,7 @@ def get_match():
     response["gameId"] = matchId
     response["gameInfo"] = match_info.json()
 
+    print(region)
     return jsonify(response,201)
 
 
