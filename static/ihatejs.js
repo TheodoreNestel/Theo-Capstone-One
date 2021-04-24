@@ -12,50 +12,43 @@ const vsForm = $("#vs_form")
 
 const vsGameDetail = $("#game-detail-vs")
 
-const User1GameIdArr = []
-const User2GameIdArr = []
 
 
 
+//this function grabs the inital account ingo based on a user's name and region
 async function fetchRiotData(region, username){
 
     const res = await axios.post("/api/get_user_profile" , {region , username})
 
     if(res.data.err){
-
-        return res.data.err;
+        
+        return false;
     }
     
     return res.data[0];
 }
-
+//this function lets us mimick jquery to grab dom elements and is used above for that purpose
 function $(selector){
   const elements =  document.querySelectorAll(selector);
   return elements.length > 1 ? elements : elements[0];
 }
 
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//this also needs some reformating ideally id like to consolidate both these two and the match info together 
-//this means probably more data grabbed out of matches and added to the table in a nicer format 
-//also I'd like to figure out datadragon so help simplify some of the chaos 
-
-//helper for champions img
+//helper for champions imgs
 function getChampionName(id){
     const data = window.championData.find(d=>d.id == id);
     
     return data.name;
 }
-
+//helper function for spell imgs
 function getSpellName(id){
     const data = window.spellData.find(d=>d.id == id);
     
     return data.Spellname
 }
 
+//this is the function that will display the data once gathered and formatted 
 function displayData(data,container,region){
-
-//console.log(data.matches[0].data.playerInfo.winners)
 
 let userWin = ""
 
@@ -65,7 +58,6 @@ console.log(data)
 
 container.innerHTML = ""
 
-//console.log(data)
 
 container.innerHTML = `<div class="profile">
         <div class="profile__picture">
@@ -85,7 +77,7 @@ container.innerHTML = `<div class="profile">
 
         <div class="match-history">
 
-        ${data.matches.map((match)=>{ //why do the braces matter here
+        ${data.matches.map((match)=>{ 
             
                    return `
             <div class="match ${match.data.playerInfo.currentUser.user.win}">
@@ -108,7 +100,7 @@ container.innerHTML = `<div class="profile">
                 </div>
 
                 <div class="match__match-stats">
-                    <h4> ${match.data.playerInfo.currentUser.user.kills} / <span>${match.data.playerInfo.currentUser.user.assists}</span> / ${match.data.playerInfo.currentUser.user.deaths}</h4>
+                    <h4> ${match.data.playerInfo.currentUser.user.kills} / <span>${match.data.playerInfo.currentUser.user.deaths}</span> / ${match.data.playerInfo.currentUser.user.assists}</h4>
                     <h5>kda</h5>
                     
                 </div>
@@ -137,16 +129,13 @@ container.innerHTML = `<div class="profile">
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-
+//this function grabs a user's matches and looks up the id's then gets the info from those matches 
 async function getMatchInfo(region , matchId ,username){ 
 
-    //im going to use the function to dissect the pieces of data i want to get from this matchInfo object 
-
-    //TODO: grab more data using for loops to make the object that comes out more digestable 
     
     const res = await axios.post("/api/get_match" , {region , matchId});
 
-      // console.log(region)
+
 
         let playerMatchId;
         let summonerName;
@@ -289,20 +278,53 @@ async function getMatchInfo(region , matchId ,username){
 
 }
 
+//this function is used to display an error if a summoner cant be found with the user name provided 
+function displayError(container){
+
+    
 
 
+container.innerHTML = ""
+
+//console.log(data)
+
+container.innerHTML = `<div class="profile">
+        <div class="profile__picture">
 
 
+            <img src="static/no_pfp.jpeg">
+            <span class="profile__level">No data found</span>
+
+        </div>
+        <div class="profile__content">
+
+            <h3>User Cannot be Found</h3>
+            <h4>Region N/A</h4>
+            <h3>Please go back to the home page and try again</h3>
+        </div>
+        </div>
 
 
-window.addEventListener("load",async function(){
-    const data = await fetchRiotData(window.user.region , window.user.username);
+        `
+
+
+   
+  
+}   
+
+//this here will add data and then call displayData with the gathered data 
+async function populateData(region , username , container){
+    const data = await fetchRiotData(region ,username);
+
+    if(!data){
+        return displayError(container)
+    }
 
     const matches = data.MatchHistory.matches.slice(0,10)
     
 
     const matchPromises = matches.map(match=>{
-        const m = getMatchInfo(window.user.region,match.gameId,window.user.username)
+        const m = getMatchInfo(region, match.gameId, username)
         m.then(res => match.data = res)
         return m
     
@@ -312,10 +334,18 @@ window.addEventListener("load",async function(){
 
     
 
-    displayData({AccountInfo:data.AccountInfo,matches,region},user1Container,window.user.region);
+    displayData({AccountInfo:data.AccountInfo,matches,region},container,window.user.region);
+
+}
+
+//this event listener is what loads the signedin user's info and send that data to the proper functions so the 
+//api calls can be made 
+window.addEventListener("load", function(){
+
+    populateData(window.user.region, window.user.username , user1Container);
 
 });
-
+//this event listener watches the "additional" user form so it can grab that data and make the proper calls 
 user2Form.addEventListener("submit", async function(evt){
 
     evt.preventDefault()
@@ -325,52 +355,15 @@ user2Form.addEventListener("submit", async function(evt){
 
    //console.log(region)
 
+   populateData(region , username , user2Container);
    
-
-   const data = await fetchRiotData(region , username);
-   //console.log(data)
-   const matches = data.MatchHistory.matches.slice(0,10);
-
-
-   const matchPromises = matches.map(match=>{
-
-    const m = getMatchInfo(region ,match.gameId , username)
-
-    m.then(res => match.data = res)
-
-    return m
-
-     })
-
-await Promise.all(matchPromises)
-
-
-
-  
-displayData({AccountInfo:data.AccountInfo,matches},user2Container,region);
-  
-
 })
 
-
-//This is gonna be kinda of scuffed so check in with a real programmer lmao 
-
- document.addEventListener("click",function(event){
-
- var element = event.target; 
- if(element.tagName === "BUTTON" && element.classList.contains("remove_table")){
-     user2Container.innerHTML =""
- }
-
- vsForm.classList.remove("invisible")
- })
-
-
- //////////
  
  //test function for console.log stuff 
 
  //champions lol hahah dont look at this ever ty <3 
+ //those two objects are used to turn keys from the api into name so we can use riot's data tool datadragon 
 
  window.championData = [
     {

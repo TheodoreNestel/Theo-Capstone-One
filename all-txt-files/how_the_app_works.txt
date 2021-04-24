@@ -1,4 +1,4 @@
-I am calling this app league Vs 
+I am calling this app League of Legends Vs or LoL Vs for short 
 
 this app will let players plug in their names to our site which will pull up their player information 
 this will be their in game account information as well as the info about their last 10 games of legaue of legends 

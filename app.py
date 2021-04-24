@@ -30,11 +30,15 @@ app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', "it's a secret") #pls ch
 
 connect_db(app)
 
-CURR_USER = "current_user" #we will slap this in our sessions to see if a user is logged in 
+CURR_USER = "current_user" #we will slap this in our sessions to see if a user is logged in
 
-RIOT_API_KEY = "RGAPI-235c0fbb-10ec-4fef-b3f5-64ef2d9b9590" #This will have to be changed every 24h 
+###########################################################################################################
+###########################################################################################################
+RIOT_API_KEY = "YOUR KEY HERE OTHERWISE THIS APP WILL NOT WORK" #This will have to be changed every 24h ### 
+###########################################################################################################
+###########################################################################################################
 
-################################
+
 
 
 #authentication routes $$$$$$$$$$$$$$$
@@ -279,25 +283,8 @@ def get_match():
     return jsonify(response,201)
 
 
-#all the routes I will need now exist however I need to fix the way REGION is set 
-#Ideally it gets set once by the user at the start and 'were good go 
 
-
-
-
-#******************************************
-
-
-#Helper function not route or api based ################
-
-########################################################
-
-
-
-#TODO 
-# - Add error checking if the front end passes a username or values that wont work on the riot api
-#return the client an error object that tells them it no work 
-
-
+#some of these functions are not currently in use and were added for plans that I had to cut.
+#if I ever get the oportunity to work on this app again they will be used to implement further app functionality 
 
 

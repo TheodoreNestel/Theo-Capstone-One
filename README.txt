@@ -1,5 +1,5 @@
 Hello thank you for checking out my first capstone.
-This will be my first web projec that I did solo start to finish so if you find any kinks please let me know !
+This will be my first web project that I did solo start to finish so if you find any kinks please let me know !
 
 To start if you'd like some background as to how things work in theory check out all-txt-files 
 this folder contains several txt files that go over the theoretical use and workings of the app.
